@@ -35,10 +35,24 @@ docker compose up --build
 ## Run Tests
 
 ```bash
+# Run unit tests only (fast — no Spring context)
 ./mvnw test
+
+# Run unit tests + integration tests
+./mvnw verify
+
+# Run integration tests only (skip unit tests)
+./mvnw verify -DskipTests
 ```
 
-All 16 integration tests cover: idempotency, out-of-order event arrival, balance computation, input validation, error handling, and pagination.
+**32 tests total** (17 unit + 15 integration):
+
+| Suite | Type | Phase | Tests | Covers |
+|-------|------|-------|-------|--------|
+| `EventServiceTest` | Unit (Mockito) | `test` | 10 | Ingestion, duplicate detection, race condition handling, event retrieval, event-not-found, paginated queries, balance computation |
+| `DtoMappingTest` | Unit | `test` | 6 | `EventResponse.fromEntity` mapping, null metadata, `BalanceResponse` construction, `ErrorResponse` single/multi-detail |
+| `EventledgerApplicationTests` | Unit | `test` | 1 | Spring context loads |
+| `EventControllerIT` | Integration | `verify` | 15 | Full HTTP lifecycle: idempotency, out-of-order events, balance aggregation, validation errors, pagination |
 
 ---
 
